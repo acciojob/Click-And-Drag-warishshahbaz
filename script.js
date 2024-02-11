@@ -1,35 +1,26 @@
-// Your code here.
-document.addEventListener('DOMContentLoaded', () => {
-  const items = document.querySelectorAll('.item');
+const items = document.querySelector('.items');
+let isMouseDown = false;
+let startX;
+let scrollLeft;
 
-  let isDown = false;
-  let startX;
-  let scrollLeft;
+items.addEventListener('mousedown', (e) => {
+  isMouseDown = true;
+  startX = e.pageX - items.offsetLeft;
+  scrollLeft = items.scrollLeft;
+});
 
-  items.forEach(item => {
-    item.addEventListener('mousedown', e => {
-      isDown = true;
-      item.classList.add('active');
-      startX = e.pageX - item.offsetLeft;
-      scrollLeft = item.scrollLeft;
-    });
+items.addEventListener('mouseleave', () => {
+  isMouseDown = false;
+});
 
-    item.addEventListener('mouseleave', () => {
-      isDown = false;
-      item.classList.remove('active');
-    });
+items.addEventListener('mouseup', () => {
+  isMouseDown = false;
+});
 
-    item.addEventListener('mouseup', () => {
-      isDown = false;
-      item.classList.remove('active');
-    });
-
-    item.addEventListener('mousemove', e => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - item.offsetLeft;
-      const walk = (x - startX) * 2;
-      item.scrollLeft = scrollLeft - walk;
-    });
-  });
+items.addEventListener('mousemove', (e) => {
+  if (!isMouseDown) return;
+  e.preventDefault();
+  const x = e.pageX - items.offsetLeft;
+  const walk = (x - startX) * 2;
+  items.scrollLeft = scrollLeft - walk;
 });
