@@ -1,28 +1,51 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const items = document.querySelector('.items');
-  let isMouseDown = false;
-  let startX = 0;
-  let scrollLeft = 0;
+const player = document.querySelector('.player');
+const video = player.querySelector('.player__video');
+const progress = player.querySelector('.progress');
+const progressBar = player.querySelector('.progress__filled');
+const toggle = player.querySelector('.toggle');
+const skipButtons = player.querySelectorAll('[data-skip]');
+const ranges = player.querySelectorAll('.player__slider');
 
-  items.addEventListener('mousedown', (e) => {
-    isMouseDown = true;
-    startX = e.pageX - items.offsetLeft;
-    scrollLeft = items.scrollLeft;
-  });
+function togglePlay() {
+  const method = video.paused ? 'play' : 'pause';
+  video[method]();
+}
 
-  items.addEventListener('mouseleave', () => {
-    isMouseDown = false;
-  });
+function updateButton() {
+  const icon = this.paused ? '►' : '❚ ❚';
+  toggle.textContent = icon;
+}
 
-  items.addEventListener('mouseup', () => {
-    isMouseDown = false;
-  });
+function skip() {
+  video.currentTime += parseFloat(this.dataset.skip);
+}
 
-  items.addEventListener('mousemove', (e) => {
-    if (!isMouseDown) return;
-    e.preventDefault();
-    const x = e.pageX - items.offsetLeft;
-    const walk = (x - startX) * 3;
-    items.scrollLeft = scrollLeft - walk;
-  });
-});
+function handleRangeUpdate() {
+  video[this.name] = this.value;
+}
+
+function handleProgress() {
+  const percent = (video.currentTime / video.duration) * 100;
+  progressBar.style.flexBasis = `${percent}%`;
+}
+
+function scrub(e) {
+  const scrubTime = (e.offsetX / progress.offsetWidth) * video.duration;
+  video.currentTime = scrubTime;
+}
+
+video.addEventListener('click', togglePlay);
+video.addEventListener('play', updateButton);
+video.addEventListener('pause', updateButton);
+video.addEventListener('timeupdate', handleProgress);
+
+toggle.addEventListener('click', togglePlay);
+skipButtons.forEach(button => button.addEventListener('click', skip));
+ranges.forEach(range => range.addEventListener('change', handleRangeUpdate));
+ranges.forEach(range => range.addEventListener('mousemove', handleRangeUpdate));
+
+let mousedown = false;
+progress.addEventListener('click', scrub);
+progress.addEventListener('mousemove', (e) => mousedown && scrub(e));
+progress.addEventListener('mousedown', () => mousedown = true);
+progress.addEventListener('mouseup', () => mousedown = false);
